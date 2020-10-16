@@ -18,7 +18,8 @@ export default class App extends Component {
         this.createItem("Builad App"),
         this.createItem("Have a lunch"),
       ],
-      term: '',
+      term: "",
+      selectedMode: "all", // all, active, mode
     };
   }
 
@@ -52,11 +53,10 @@ export default class App extends Component {
 
   onToggleImportant = (id) => {
     this.setState(({ todoData }) => {
-        return {
-          todoData: this.toggleProperty(todoData, id, "important"),
-        };
-      });
-  
+      return {
+        todoData: this.toggleProperty(todoData, id, "important"),
+      };
+    });
   };
 
   onToggleDone = (id) => {
@@ -76,16 +76,35 @@ export default class App extends Component {
   onSearchChange = (inputValue) => {
     this.setState(() => {
       return {
-        term: inputValue
+        term: inputValue,
       };
     });
-
-
-  }
+  };
 
   filterList() {
-    return this.state.todoData.filter((item) => item.label.toLowerCase().includes(this.state.term.toLowerCase()));
+    let result;
+    const { todoData, selectedMode, term } = this.state;
+
+    if (selectedMode === "all") {
+      result = todoData.filter((item) =>
+        item.label.toLowerCase().includes(term.toLowerCase())
+      );
+    } else if (selectedMode === 'active') {
+
+      result = todoData.filter((item) => !item.done && item.label.toLowerCase().includes(term.toLowerCase()) )
+    } else if (selectedMode === 'done') {
+      result = todoData.filter((item) => item.done && item.label.toLowerCase().includes(term.toLowerCase()) )
+
+    }
+
+    return result;
   }
+
+  omSwitchMode = (mode) => {
+    this.setState({
+      selectedMode: mode,
+    });
+  };
 
   render() {
     const { todoData } = this.state;
@@ -98,7 +117,7 @@ export default class App extends Component {
         <AppHeader todo={todoCount} done={doneCount} />
         <div className="top-panel d-flex">
           <SearchPanel onSearchChange={this.onSearchChange} test="test" />
-          <ItemStatusFilter />
+          <ItemStatusFilter omSwitchMode={this.omSwitchMode} />
         </div>
         <TodoList
           todos={visibleList}
