@@ -18,6 +18,7 @@ export default class App extends Component {
         this.createItem("Builad App"),
         this.createItem("Have a lunch"),
       ],
+      term: '',
     };
   }
 
@@ -30,18 +31,6 @@ export default class App extends Component {
     };
   }
   deleteItem = (id) => {
-    // one way
-    // const todos = this.state.todoData.filter((item) => {
-    //     return item.id !== id
-    // });
-
-    // this.setState(() => {
-    //     return {
-    //         todoData: todos
-    //     }
-    // })
-
-    // 2 way
     this.setState(({ todoData }) => {
       const ind = todoData.findIndex((el) => el.id === id);
       const newArray = [...todoData.slice(0, ind), ...todoData.slice(ind + 1)];
@@ -84,8 +73,23 @@ export default class App extends Component {
     return [...arr.slice(0, itemInd), newItem, ...arr.slice(itemInd + 1)];
   }
 
+  onSearchChange = (inputValue) => {
+    this.setState(() => {
+      return {
+        term: inputValue
+      };
+    });
+
+
+  }
+
+  filterList() {
+    return this.state.todoData.filter((item) => item.label.toLowerCase().includes(this.state.term.toLowerCase()));
+  }
+
   render() {
     const { todoData } = this.state;
+    const visibleList = this.filterList();
     const doneCount = todoData.filter((todo) => todo.done).length;
     const todoCount = todoData.length - doneCount;
 
@@ -93,11 +97,11 @@ export default class App extends Component {
       <div className="todo-app">
         <AppHeader todo={todoCount} done={doneCount} />
         <div className="top-panel d-flex">
-          <SearchPanel />
+          <SearchPanel onSearchChange={this.onSearchChange} test="test" />
           <ItemStatusFilter />
         </div>
         <TodoList
-          todos={todoData}
+          todos={visibleList}
           onDeleted={this.deleteItem}
           onToggleImportant={this.onToggleImportant}
           onToggleDone={this.onToggleDone}
